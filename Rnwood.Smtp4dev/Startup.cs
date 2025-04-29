@@ -27,6 +27,12 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Rnwood.Smtp4dev.Server.Settings;
 using Microsoft.AspNetCore.Authorization;
 using AspNetCore.Authentication.Basic;
+using Org.BouncyCastle.Asn1;
+using Npgsql;
+using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
+using System.Text;
+using System.Data.Entity;
 
 namespace Rnwood.Smtp4dev
 {
@@ -68,7 +74,21 @@ namespace Rnwood.Smtp4dev
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
                     {
-                        if (string.IsNullOrEmpty(serverOptions.Database))
+                        if (!string.IsNullOrEmpty(serverOptions.PgDatabase))
+                        {
+                            Log.Logger.Information("Using PostgreSQL database.");
+
+                            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+                            services.AddDbContext<Smtp4devDbContext>(ServiceLifetime.Transient);
+                                //serverOptions.PgDatabase, );
+
+                            opt.UseNpgsql(serverOptions.PgDatabase)
+                                .ReplaceService<ISqlGenerationHelper, NpgsqlSqlGenerationLowercasingHelper>();
+
+                            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+                        }
+                        else if (string.IsNullOrEmpty(serverOptions.Database))
                         {
                             Log.Logger.Information("Using in memory database.");
 
@@ -91,9 +111,8 @@ namespace Rnwood.Smtp4dev
                             opt.UseSqlite($"Data Source={dbLocation}");
                         }
 
-
-
                         using var context = new Smtp4devDbContext((DbContextOptions<Smtp4devDbContext>)opt.Options);
+
                         if (string.IsNullOrEmpty(serverOptions.Database))
                         {
                             context.Database.Migrate();
@@ -224,7 +243,7 @@ namespace Rnwood.Smtp4dev
                          {
                              await next(context);
                          }
-                         catch (FileNotFoundException ex)
+                         catch (FileNotFoundException ex) 
                          {
                              context.Response.StatusCode = 404;
                              await context.Response.WriteAsync(ex.Message);
@@ -264,5 +283,22 @@ namespace Rnwood.Smtp4dev
                 configure(app);
             }
         }
+    }
+
+    /// <summary>A replacement for <see cref="NpgsqlSqlGenerationHelper"/>
+    /// to convert PascalCaseCsharpyIdentifiers to alllowercasenames.
+    /// So table and column names with no embedded punctuation
+    /// get generated with no quotes or delimiters.</summary>
+    public class NpgsqlSqlGenerationLowercasingHelper : NpgsqlSqlGenerationHelper
+    {
+        //Don't lowercase ef's migration table
+        const string dontAlter = "__EFMigrationsHistory";
+        static string Customize(string input) => input == dontAlter ? input : input.ToLower();
+        public NpgsqlSqlGenerationLowercasingHelper(RelationalSqlGenerationHelperDependencies dependencies)
+            : base(dependencies) { }
+        public override string DelimitIdentifier(string identifier)
+            => base.DelimitIdentifier(Customize(identifier));
+        public override void DelimitIdentifier(StringBuilder builder, string identifier)
+            => base.DelimitIdentifier(builder, Customize(identifier));
     }
 }

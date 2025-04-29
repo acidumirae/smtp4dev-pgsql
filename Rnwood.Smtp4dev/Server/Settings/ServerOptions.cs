@@ -20,6 +20,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool AllowRemoteConnections { get; set; } = true;
 
         public string Database { get; set; } = "database.db";
+        public string PgDatabase { get; set; } = "Host=127.0.0.1;Port=15432;Database=smtp4dev;User Id=root;Password=Jie9toof";
+
 
         public int NumberOfMessagesToKeep { get; set; } = 100;
         public int NumberOfSessionsToKeep { get; set; } = 100;

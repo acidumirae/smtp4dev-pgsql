@@ -582,7 +582,7 @@ namespace Rnwood.Smtp4dev.Server
 
         private void TrimMessages(Smtp4devDbContext dbContext)
         {
-            foreach (var mailbox in dbContext.Mailboxes)
+            foreach (var mailbox in dbContext.Mailboxes.AsSplitQuery())
             {
                 dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Mailbox == mailbox).OrderByDescending(m => m.ReceivedDate)
                     .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));

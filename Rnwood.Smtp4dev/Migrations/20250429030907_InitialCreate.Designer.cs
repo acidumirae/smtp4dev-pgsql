@@ -2,18 +2,22 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.DbModel;
 
 #nullable disable
 
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    partial class Smtp4devDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250429030907_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +26,7 @@ namespace Rnwood.Smtp4dev.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("sample1.Imapstate", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Imapstate", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -38,7 +42,7 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("imapstate", (string)null);
                 });
 
-            modelBuilder.Entity("sample1.Mailbox", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Mailbox", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -54,7 +58,7 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("mailboxes", (string)null);
                 });
 
-            modelBuilder.Entity("sample1.Message", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -143,7 +147,7 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("messages", (string)null);
                 });
 
-            modelBuilder.Entity("sample1.Messagerelay", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Messagerelay", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -169,7 +173,7 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("messagerelays", (string)null);
                 });
 
-            modelBuilder.Entity("sample1.Session", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Session", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
@@ -213,15 +217,15 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("sessions", (string)null);
                 });
 
-            modelBuilder.Entity("sample1.Message", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
                 {
-                    b.HasOne("sample1.Mailbox", "Mailbox")
+                    b.HasOne("Rnwood.Smtp4dev.DbModel.Mailbox", "Mailbox")
                         .WithMany("Messages")
                         .HasForeignKey("Mailboxid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("fk_messages_mailboxes_mailboxid");
 
-                    b.HasOne("sample1.Session", "Session")
+                    b.HasOne("Rnwood.Smtp4dev.DbModel.Session", "Session")
                         .WithMany("Messages")
                         .HasForeignKey("Sessionid")
                         .OnDelete(DeleteBehavior.SetNull)
@@ -232,9 +236,9 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("sample1.Messagerelay", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Messagerelay", b =>
                 {
-                    b.HasOne("sample1.Message", "Message")
+                    b.HasOne("Rnwood.Smtp4dev.DbModel.Message", "Message")
                         .WithMany("Messagerelays")
                         .HasForeignKey("Messageid")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -244,17 +248,17 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Navigation("Message");
                 });
 
-            modelBuilder.Entity("sample1.Mailbox", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Mailbox", b =>
                 {
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("sample1.Message", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
                 {
                     b.Navigation("Messagerelays");
                 });
 
-            modelBuilder.Entity("sample1.Session", b =>
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Session", b =>
                 {
                     b.Navigation("Messages");
                 });
